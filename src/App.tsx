@@ -13,6 +13,7 @@ interface User {
 interface UsersResponse {
   count: number;
   numDuplicatedIds: number;
+  numDuplicatedFieldsIds: number;
   duplicatedIds: string[];
   duplicatedFieldsIds: string[];
   invalidEmailsIds: number[];
@@ -138,6 +139,7 @@ function App() {
             duplicatedIds: duplicateIds,
             duplicatedFieldsIds: duplicateFieldsIds,
             numDuplicatedIds: duplicateIds.length,
+            numDuplicatedFieldsIds: duplicateFieldsIds.length,
             invalidEmailsIds,
             invalidPhonesIds,
           };

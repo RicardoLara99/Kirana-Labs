@@ -3,6 +3,7 @@ import "./table.css";
 interface UsersResponse {
   count: number;
   numDuplicatedIds: number;
+  numDuplicatedFieldsIds: number;
   duplicatedIds: string[];
   duplicatedFieldsIds: string[];
   invalidEmailsIds: number[];
@@ -21,6 +22,7 @@ export const Table = ({ users }: { users: UsersResponse }) => {
   const {
     count,
     numDuplicatedIds,
+    numDuplicatedFieldsIds,
     data,
     duplicatedIds,
     duplicatedFieldsIds,
@@ -31,7 +33,8 @@ export const Table = ({ users }: { users: UsersResponse }) => {
   return (
     <>
       <div>Records: {count}</div>
-      <div>Duplicates: {numDuplicatedIds}</div>
+      <div>Duplicates fields: {numDuplicatedFieldsIds}</div>
+      <div>Duplicates values: {numDuplicatedIds}</div>
       <div className="table-responsive">
         <table className="table">
           <thead>
