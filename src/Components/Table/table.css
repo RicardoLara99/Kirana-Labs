@@ -1,0 +1,44 @@
+.table-responsive {
+  overflow: auto;
+  max-height: 700px;
+  max-width: -webkit-fill-available;
+}
+
+.red {
+  background-color: #ec5463;
+}
+
+.yellow {
+  background-color: #fae390;
+}
+
+.table {
+  width: 100%;
+  max-width: 100%;
+  margin-block: 1rem;
+  background-color: #e8f2fa;
+  color: #000000;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 0.75rem;
+  vertical-align: top;
+  border: 1px solid #000000;
+}
+
+.table th {
+  font-weight: bold;
+  text-align: left;
+  background-color: #aa67e9;
+  color: #fff;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: #f6f8fa;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #d7e2f0;
+}
