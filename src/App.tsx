@@ -37,7 +37,7 @@ function App() {
     const duplicateValues: Set<string> = new Set();
     const duplicateFields: Set<string> = new Set();
     const fullDuplicateMap: Map<string, string> = new Map();
-  
+
     for (const user of arr) {
       // Create a unique key based on all fields
       const userKey = `${user.name}-${user.email}-${user.phone}`;
@@ -60,7 +60,7 @@ function App() {
         if (!seen[key]) {
           seen[key] = new Set(); 
         }
-  
+        
         // If the value has already been seen, mark the ID as a duplicate.
         if (seen[key].has(value)) {
           duplicateValues.add(user.id.toString());
@@ -69,9 +69,6 @@ function App() {
         }
       }
     }
-  
-    console.log("# duplicate values:", Array.from(duplicateValues));
-    console.log("# duplicate fields:", Array.from(duplicateFields));
   
     return {
       duplicateIds: Array.from(duplicateValues),

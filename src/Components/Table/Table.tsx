@@ -1,3 +1,4 @@
+import { useEffect, useState, ChangeEvent } from "react";
 import "./table.css";
 
 interface UsersResponse {
@@ -19,6 +20,7 @@ interface User {
 }
 
 export const Table = ({ users }: { users: UsersResponse }) => {
+  const [search, setSearch] = useState("")
   const {
     count,
     numDuplicatedIds,
@@ -30,11 +32,19 @@ export const Table = ({ users }: { users: UsersResponse }) => {
     invalidPhonesIds,
   } = users;
 
+  const handleChange=(e: ChangeEvent<HTMLInputElement>)=>{
+    setSearch(e.target.value)
+  }
+  
   return (
     <>
       <div>Records: {count}</div>
       <div>Duplicates fields: {numDuplicatedFieldsIds}</div>
       <div>Duplicates values: {numDuplicatedIds}</div>
+      <div>
+        <label>Busqueda:</label>
+        <input onChange={handleChange} placeholder="Nombre - Email - Phone"/>
+      </div>
       <div className="table-responsive">
         <table className="table">
           <thead>
@@ -46,7 +56,7 @@ export const Table = ({ users }: { users: UsersResponse }) => {
             </tr>
           </thead>
           <tbody>
-            {data.map(({ id, name, email, phone }) => {
+            {data.filter((user)=>user.name.includes(search) || user.email.includes(search) || user.phone.includes(search)).map(({ id, name, email, phone }) => {
               if (duplicatedFieldsIds.includes(id.toString())) return;
 
               return (
