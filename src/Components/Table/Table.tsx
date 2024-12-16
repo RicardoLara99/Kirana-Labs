@@ -4,10 +4,6 @@ interface UsersResponse {
   count: number;
   numDuplicatedIds: number;
   numDuplicatedFieldsIds: number;
-  duplicatedIds: string[];
-  duplicatedFieldsIds: string[];
-  invalidEmailsIds: number[];
-  invalidPhonesIds: number[];
   data: User[];
 }
 
@@ -16,6 +12,9 @@ interface User {
   name: string;
   email: string;
   phone: string;
+  invalidPhone: string;
+  invalidEmail: string;
+  hasDuplicatedValue: string;
 }
 
 export const Table = ({ users }: { users: UsersResponse }) => {
@@ -24,16 +23,12 @@ export const Table = ({ users }: { users: UsersResponse }) => {
     numDuplicatedIds,
     numDuplicatedFieldsIds,
     data,
-    duplicatedIds,
-    duplicatedFieldsIds,
-    invalidEmailsIds,
-    invalidPhonesIds,
   } = users;
 
   return (
     <>
       <div>Records: {count}</div>
-      <div>Duplicates fields: {numDuplicatedFieldsIds}</div>
+      <div>Duplicates fields (skipped): {numDuplicatedFieldsIds}</div>
       <div>Duplicates values: {numDuplicatedIds}</div>
       <div className="table-responsive">
         <table className="table">
@@ -46,29 +41,22 @@ export const Table = ({ users }: { users: UsersResponse }) => {
             </tr>
           </thead>
           <tbody>
-            {data.map(({ id, name, email, phone }) => {
-              if (duplicatedFieldsIds.includes(id.toString())) return;
+            {data.map(({ id, name, email, phone, invalidPhone, invalidEmail, hasDuplicatedValue }) => {
 
               return (
                 <tr
                   key={id}
-                  className={`${
-                    duplicatedIds.includes(id.toString()) ? "red" : ""
-                  }`}
+                  className={`${hasDuplicatedValue}`}
                 >
                   <td>{id}</td>
                   <td>{name}</td>
                   <td
-                    className={`${
-                      invalidEmailsIds.includes(id) ? "yellow" : ""
-                    }`}
+                    className={`${invalidEmail}`}
                   >
                     {email}
                   </td>
                   <td
-                    className={`${
-                      invalidPhonesIds.includes(id) ? "yellow" : ""
-                    }`}
+                    className={`${invalidPhone}`}
                   >
                     {phone}
                   </td>

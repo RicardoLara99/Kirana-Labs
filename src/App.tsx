@@ -8,16 +8,15 @@ interface User {
   name: string;
   email: string;
   phone: string;
+  invalidPhone: string;
+  invalidEmail: string;
+  hasDuplicatedValue: string;
 }
 
 interface UsersResponse {
   count: number;
   numDuplicatedIds: number;
   numDuplicatedFieldsIds: number;
-  duplicatedIds: string[];
-  duplicatedFieldsIds: string[];
-  invalidEmailsIds: number[];
-  invalidPhonesIds: number[];
   data: User[];
 }
 
@@ -32,116 +31,97 @@ function App() {
   const [loading, setLoading] = useState<boolean>(false);
   const [users, setUsers] = useState<UsersResponse | null>(null);
 
-  const findDuplicateIds = (arr: User[]): { duplicateIds: string[], duplicateFieldsIds: string[] } => {
-    const seen: { [key: string]: Set<string> } = {};
-    const duplicateValues: Set<string> = new Set();
-    const duplicateFields: Set<string> = new Set();
-    const fullDuplicateMap: Map<string, string> = new Map();
-  
-    for (const user of arr) {
-      // Create a unique key based on all fields
-      const userKey = `${user.name}-${user.email}-${user.phone}`;
-  
-      // Check if this combination has been seen before
-      if (fullDuplicateMap.has(userKey)) {
-        // If fully duplicated, add to duplicateFields and skip further processing
-        duplicateFields.add(user.id.toString());
-        continue;
-      } else {
-        // Mark this combination as seen
-        fullDuplicateMap.set(userKey, user.id.toString());
-      }
-  
-      // Process for duplicateValues if not fully duplicated
-      for (const key of ["name", "email", "phone"] as Array<keyof User>) {
-        const value = String(user[key]);
-  
-        // Initialize the map if it does not exist
-        if (!seen[key]) {
-          seen[key] = new Set(); 
-        }
-  
-        // If the value has already been seen, mark the ID as a duplicate.
-        if (seen[key].has(value)) {
-          duplicateValues.add(user.id.toString());
-        } else {
-          seen[key].add(value); 
-        }
-      }
-    }
-  
-    console.log("# duplicate values:", Array.from(duplicateValues));
-    console.log("# duplicate fields:", Array.from(duplicateFields));
-  
-    return {
-      duplicateIds: Array.from(duplicateValues),
-      duplicateFieldsIds: Array.from(duplicateFields),
-    };
-  };
-  
-
-  const getInvalIdPhones = (users: User[]): number[] => {
-    const invalidIdPhones: number[] = [];
+  const getInvalIdPhone = (phone:string): string => {
     const regexPhone = /^[0-9]{10}$/;
 
-    for (const user of users) {
-      if (!regexPhone.test(user.phone)) {
-        invalidIdPhones.push(user.id);
-      }
+    if (!regexPhone.test(phone)) {
+      return "yellow"
     }
 
-    return invalidIdPhones;
+    return "";
   };
 
-  const getInvalIdEmails = (users: User[]): number[] => {
-    const invalidIdEmails: number[] = [];
+  const getInvalIdEmail = (email:string): string => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    for (const user of users) {
-      if (!regex.test(user.email)) {
-        invalidIdEmails.push(user.id);
-      }
+    if (!regex.test(email)) {
+      return "yellow"
     }
 
-    return invalidIdEmails;
+    return ""
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (file) {
       setLoading(true);
+      const seen: { [key: string]: Set<string> } = {};
+      const duplicateValues: Set<string> = new Set();
+      const duplicateFields: Set<string> = new Set();
+      const fullDuplicateMap: Map<string, string> = new Map();
+      
       Papa.parse(file, {
         complete: async (result) => {
           const results: User[] = [];
 
-          (result.data as CsvRow[]).forEach((row) => {
+          for(const row of (result.data as CsvRow[])){
             const name = row["Nombre"];
             const phone = row["Telefono"] || "";
             const email = row["Correo Electronico"] || "";
-
+            let hasDuplicatedValue = ""
             if (name || phone || email) {
+              /*
+               * Add duplicates and invalids logic
+               */
+              // Create a unique key based on all fields
+              const userKey = `${name}-${email}-${phone}`;
+              const id = results.length + 1;
+              // Check if this combination has been seen before
+              if (fullDuplicateMap.has(userKey)) {
+                // If fully duplicated, add to duplicateFields and skip further processing
+                duplicateFields.add(id.toString());
+                continue;
+              } else {
+                // Mark this combination as seen
+                fullDuplicateMap.set(userKey, id.toString());
+              }
+
+              // Process for duplicateValues if not fully duplicated
+              for (const key of [name, email, phone] as Array<keyof User>) {
+                const value = key
+
+                // Initialize the map if it does not exist
+                if (!seen[key]) {
+                  seen[key] = new Set(); 
+                }
+
+                // If the value has already been seen, mark the ID as a duplicate.
+                if (seen[key].has(value)) {
+                  duplicateValues.add(id.toString());
+                  hasDuplicatedValue = "red";
+                } else {
+                  seen[key].add(value); 
+                }
+              }
               results.push({
-                id: results.length + 1,
+                id,
                 name: name || "N/A",
                 email,
                 phone,
+                invalidPhone: getInvalIdPhone(phone),
+                invalidEmail: getInvalIdEmail(email),
+                hasDuplicatedValue
               });
             }
-          });
-
-          const {duplicateIds, duplicateFieldsIds} = findDuplicateIds(results);
-          const invalidEmailsIds = getInvalIdEmails(results);
-          const invalidPhonesIds = getInvalIdPhones(results);
+          }
+          const duplicateIds = Array.from(duplicateValues)
+          const duplicateFieldsIds = Array.from(duplicateFields)
 
           const usersInfo = {
             data: results,
             count: results.length,
-            duplicatedIds: duplicateIds,
-            duplicatedFieldsIds: duplicateFieldsIds,
             numDuplicatedIds: duplicateIds.length,
             numDuplicatedFieldsIds: duplicateFieldsIds.length,
-            invalidEmailsIds,
-            invalidPhonesIds,
           };
 
           setTimeout(() => {
